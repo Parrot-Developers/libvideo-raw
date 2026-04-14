@@ -62,6 +62,12 @@ static struct {
 	 "",
 	 false,
 	 CROWD_RUN_FRAME_COUNT},
+	{VDEF_RESOLUTION_144P,
+	 &vdef_rgba,
+	 "Raw/SVT/crowd_run_144p50_rgba.yuv",
+	 "",
+	 false,
+	 CROWD_RUN_FRAME_COUNT},
 	{VDEF_RESOLUTION_192X144,
 	 &vdef_i420,
 	 "Raw/SVT/crowd_run_192x144@50_i420.yuv",
@@ -179,7 +185,7 @@ static void test_vraw_reader_new(void)
 
 		/* invalid config: format */
 		fill_config(&invalid_config, resolution, format);
-		invalid_config.format = vdef_abgr;
+		invalid_config.format = vdef_bayer_bggr;
 
 		ret = vraw_reader_new(path, &invalid_config, &reader);
 		CU_ASSERT_EQUAL(ret, -EINVAL);

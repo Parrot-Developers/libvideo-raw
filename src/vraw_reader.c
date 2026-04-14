@@ -41,7 +41,7 @@
 #include <ulog.h>
 
 #include <pthread.h>
-#define NB_SUPPORTED_FORMATS 32
+#define NB_SUPPORTED_FORMATS 41
 static struct vdef_raw_format supported_formats[NB_SUPPORTED_FORMATS];
 static pthread_once_t supported_formats_is_init = PTHREAD_ONCE_INIT;
 static void initialize_supported_formats(void)
@@ -78,6 +78,15 @@ static void initialize_supported_formats(void)
 	supported_formats[29] = vdef_raw16_be;
 	supported_formats[30] = vdef_raw32;
 	supported_formats[31] = vdef_raw32_be;
+	supported_formats[32] = vdef_rgb;
+	supported_formats[33] = vdef_bgr;
+	supported_formats[34] = vdef_rgba;
+	supported_formats[35] = vdef_abgr;
+	supported_formats[36] = vdef_bgra;
+	supported_formats[37] = vdef_bayer_rggb;
+	supported_formats[38] = vdef_bayer_bggr;
+	supported_formats[39] = vdef_bayer_grbg;
+	supported_formats[40] = vdef_bayer_gbrg;
 }
 
 
@@ -504,12 +513,16 @@ static int vraw_reader_frame_read_planes(struct vraw_reader *self,
 	unsigned int height = self->cfg.info.resolution.height;
 	unsigned int row_bytes = self->cfg.info.resolution.width *
 				 self->cfg.format.data_size / 8;
+	if (self->cfg.format.data_layout == VDEF_RAW_DATA_LAYOUT_PACKED) {
+		row_bytes *= vdef_get_raw_frame_component_count(
+			self->cfg.format.pix_format);
+	}
 
 	errno = EINVAL;
 	ULOG_ERRNO_RETURN_ERR_IF(self == NULL, EINVAL);
 	ULOG_ERRNO_RETURN_ERR_IF(data == NULL, EINVAL);
 
-	/* Read Y */
+	/* Read first plane (Y or single packed plane) */
 	for (unsigned int h = 0; h < height; ++h) {
 		res = fread(current_addr, row_bytes, 1, self->file);
 		if (res == 1) {

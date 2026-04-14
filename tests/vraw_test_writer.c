@@ -38,6 +38,7 @@ static struct {
 	{VDEF_RESOLUTION_144P, &vdef_i420, "/tmp/crowd_run_144p50_i420.yuv"},
 	{VDEF_RESOLUTION_144P, &vdef_nv12, "/tmp/crowd_run_144p50_nv12.yuv"},
 	{VDEF_RESOLUTION_144P, &vdef_nv21, "/tmp/crowd_run_144p50_nv21.yuv"},
+	{VDEF_RESOLUTION_144P, &vdef_rgba, "/tmp/crowd_run_144p50_rgba.yuv"},
 	{VDEF_RESOLUTION_192X144,
 	 &vdef_i420,
 	 "/tmp/crowd_run_192x144@50_i420.yuv"},
@@ -172,7 +173,7 @@ static void test_vraw_writer_new(void)
 
 		/* invalid config: format */
 		fill_config(&invalid_config, resolution, format);
-		invalid_config.format = vdef_abgr;
+		invalid_config.format = vdef_bayer_bggr;
 
 		ret = vraw_writer_new(path, &invalid_config, &writer);
 		CU_ASSERT_EQUAL(ret, -EINVAL);
@@ -237,8 +238,9 @@ static void test_vraw_writer_frame_write(void)
 		ret = vraw_writer_frame_write(writer, &frame);
 		CU_ASSERT_EQUAL(ret, -EINVAL);
 
-		/* missing U, V planes (when not in GRAY format) */
-		if (!vdef_raw_format_cmp(format, &vdef_gray)) {
+		/* missing U, V planes (when not in RGBA or GRAY format) */
+		if (!vdef_raw_format_cmp(format, &vdef_gray) &&
+		    !vdef_raw_format_cmp(format, &vdef_rgba)) {
 			frame.cdata[0] = frame_data;
 			frame.cdata[1] = NULL;
 			frame.cdata[2] = NULL;

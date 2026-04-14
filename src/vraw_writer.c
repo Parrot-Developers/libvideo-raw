@@ -39,7 +39,7 @@
 #include <ulog.h>
 
 #include <pthread.h>
-#define NB_SUPPORTED_FORMATS 32
+#define NB_SUPPORTED_FORMATS 37
 static struct vdef_raw_format supported_formats[NB_SUPPORTED_FORMATS];
 static pthread_once_t supported_formats_is_init = PTHREAD_ONCE_INIT;
 static void initialize_supported_formats(void)
@@ -76,6 +76,11 @@ static void initialize_supported_formats(void)
 	supported_formats[29] = vdef_raw16_be;
 	supported_formats[30] = vdef_raw32;
 	supported_formats[31] = vdef_raw32_be;
+	supported_formats[32] = vdef_rgb;
+	supported_formats[33] = vdef_bgr;
+	supported_formats[34] = vdef_rgba;
+	supported_formats[35] = vdef_abgr;
+	supported_formats[36] = vdef_bgra;
 }
 
 
@@ -159,6 +164,10 @@ int vraw_writer_new(const char *filename,
 
 	self->primary_line_width = self->cfg.info.resolution.width *
 				   self->cfg.format.data_size / 8;
+	if (self->cfg.format.data_layout == VDEF_RAW_DATA_LAYOUT_PACKED) {
+		self->primary_line_width *= vdef_get_raw_frame_component_count(
+			self->cfg.format.pix_format);
+	}
 
 	self->filename = strdup(filename);
 	if (self->filename == NULL) {
