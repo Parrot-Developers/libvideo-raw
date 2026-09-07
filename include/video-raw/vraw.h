@@ -147,7 +147,7 @@ VRAW_API int vraw_reader_destroy(struct vraw_reader *self);
  * @param config: reader configuration (output)
  * @return 0 on success, negative errno value in case of error
  */
-VRAW_API int vraw_reader_get_config(struct vraw_reader *self,
+VRAW_API int vraw_reader_get_config(const struct vraw_reader *self,
 				    struct vraw_reader_config *config);
 
 
@@ -156,7 +156,7 @@ VRAW_API int vraw_reader_get_config(struct vraw_reader *self,
  * @param self: reader instance handle
  * @return buffer size on success, negative errno value in case of error
  */
-VRAW_API ssize_t vraw_reader_get_min_buf_size(struct vraw_reader *self);
+VRAW_API ssize_t vraw_reader_get_min_buf_size(const struct vraw_reader *self);
 
 
 /**
@@ -164,7 +164,8 @@ VRAW_API ssize_t vraw_reader_get_min_buf_size(struct vraw_reader *self);
  * @param self: reader instance handle
  * @return file frame count on success, negative errno value in case of error
  */
-VRAW_API ssize_t vraw_reader_get_file_frame_count(struct vraw_reader *self);
+VRAW_API ssize_t
+vraw_reader_get_file_frame_count(const struct vraw_reader *self);
 
 
 /**

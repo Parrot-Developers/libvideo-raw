@@ -185,7 +185,7 @@ static void test_vraw_reader_new(void)
 
 		/* invalid config: format */
 		fill_config(&invalid_config, resolution, format);
-		invalid_config.format = vdef_bayer_bggr;
+		invalid_config.format = vdef_bayer_rggb_14;
 
 		ret = vraw_reader_new(path, &invalid_config, &reader);
 		CU_ASSERT_EQUAL(ret, -EINVAL);

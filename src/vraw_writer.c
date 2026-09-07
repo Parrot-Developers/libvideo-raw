@@ -216,7 +216,8 @@ int vraw_writer_frame_write(struct vraw_writer *self,
 			    const struct vraw_frame *frame)
 {
 	int res = 0;
-	size_t strd, res1;
+	size_t strd;
+	size_t res1;
 	const uint8_t *ptr;
 	unsigned int i;
 

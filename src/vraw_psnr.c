@@ -48,7 +48,8 @@ static int normalized_mse(const uint8_t *data1,
 {
 	double e = 0;
 	double sum_e2 = 0;
-	size_t i, j;
+	size_t i;
+	size_t j;
 
 	unsigned int f = VDEF_ROUND_UP(bit_depth, 8);
 
@@ -61,8 +62,8 @@ static int normalized_mse(const uint8_t *data1,
 
 	if (f == 1) {
 		for (j = 0; j < height; j++) {
-			uint8_t *d1 = (uint8_t *)(data1 + j * stride1);
-			uint8_t *d2 = (uint8_t *)(data2 + j * stride2);
+			const uint8_t *d1 = (data1 + j * stride1);
+			const uint8_t *d2 = (data2 + j * stride2);
 
 			for (i = 0; i < width; i++, d1 += step1, d2 += step2) {
 				e = (double)*d1 - (double)*d2;
@@ -71,8 +72,10 @@ static int normalized_mse(const uint8_t *data1,
 		}
 	} else {
 		for (j = 0; j < height; j++) {
-			uint16_t *d1 = (uint16_t *)(data1 + j * stride1);
-			uint16_t *d2 = (uint16_t *)(data2 + j * stride2);
+			const uint16_t *d1 =
+				(const uint16_t *)(data1 + j * stride1);
+			const uint16_t *d2 =
+				(const uint16_t *)(data2 + j * stride2);
 
 			for (i = 0; i < width; i++, d1 += step1, d2 += step2) {
 				e = (double)*d1 - (double)*d2;
@@ -107,14 +110,14 @@ static int get_chroma_params(const struct vraw_frame *frame,
 		case VDEF_RAW_PIX_ORDER_YUV:
 			*u = frame->data[1];
 			*v = frame->data[2];
-			*stride_u = frame->frame.plane_stride[1];
-			*stride_v = frame->frame.plane_stride[2];
+			*stride_u = (uint32_t)frame->frame.plane_stride[1];
+			*stride_v = (uint32_t)frame->frame.plane_stride[2];
 			break;
 		case VDEF_RAW_PIX_ORDER_YVU:
 			*u = frame->data[2];
 			*v = frame->data[1];
-			*stride_u = frame->frame.plane_stride[2];
-			*stride_v = frame->frame.plane_stride[1];
+			*stride_u = (uint32_t)frame->frame.plane_stride[2];
+			*stride_v = (uint32_t)frame->frame.plane_stride[1];
 			break;
 		default: /* not supported */
 			res = -ENOSYS;
@@ -127,8 +130,8 @@ static int get_chroma_params(const struct vraw_frame *frame,
 
 	case VDEF_RAW_DATA_LAYOUT_SEMI_PLANAR:
 		*step = 2;
-		*stride_u = frame->frame.plane_stride[1];
-		*stride_v = frame->frame.plane_stride[1];
+		*stride_u = (uint32_t)frame->frame.plane_stride[1];
+		*stride_v = (uint32_t)frame->frame.plane_stride[1];
 
 		switch (frame->frame.format.pix_order) {
 		case VDEF_RAW_PIX_ORDER_YUV:
@@ -162,9 +165,11 @@ static int get_chroma_params(const struct vraw_frame *frame,
 
 static double mse_norm_to_psnr(double mse_norm)
 {
-	/* psnr = -10 * log10(mse_norm)
+	/**
+	 * psnr = -10 * log10(mse_norm)
 	 * mse_norm = mse / (width * height * dyn * dyn)
-	 * dyn is max_pixel_value = (1 << bit_depth) - 1 */
+	 * dyn is max_pixel_value = (1 << bit_depth) - 1
+	 */
 	if (mse_norm == 0.0) {
 		ULOGI("MSE is null; PSNR is set to 1000.0");
 		return 1000.0;
@@ -222,8 +227,16 @@ int vraw_compute_psnr(const struct vraw_frame *frame1,
 		return -EINVAL;
 	}
 
-	uint8_t *u1, *v1, *u2, *v2;
-	uint32_t step1, stride_u1, stride_v1, step2, stride_u2, stride_v2;
+	uint8_t *u1;
+	uint8_t *v1;
+	uint8_t *u2;
+	uint8_t *v2;
+	uint32_t step1;
+	uint32_t stride_u1;
+	uint32_t stride_v1;
+	uint32_t step2;
+	uint32_t stride_u2;
+	uint32_t stride_v2;
 
 	res = get_chroma_params(
 		frame1, &u1, &stride_u1, &v1, &stride_v1, &step1);

@@ -112,7 +112,11 @@ struct vraw_reader {
 static int y4m_header_read(struct vraw_reader *self)
 {
 	int res;
-	char str[100], *r, *p, *p2, *tmp;
+	char str[100];
+	char *r;
+	const char *p;
+	const char *p2;
+	char *tmp;
 	off_t off;
 
 	r = fgets(str, sizeof(str), self->file);
@@ -174,6 +178,7 @@ static int y4m_header_read(struct vraw_reader *self)
 				self->cfg.format = vdef_i420;
 			else if (strcmp(p + 1, "420p10") == 0)
 				self->cfg.format = vdef_i420_10_16le;
+			break;
 		default:
 			break;
 		}
@@ -188,7 +193,8 @@ static int y4m_header_read(struct vraw_reader *self)
 static int y4m_frame_header_read(struct vraw_reader *self)
 {
 	int res;
-	char str[10], *r;
+	char str[10];
+	const char *r;
 
 	r = fgets(str, sizeof(str), self->file);
 	if (r == NULL) {
@@ -372,18 +378,18 @@ int vraw_reader_new(const char *filename,
 
 	memset(self->plane_stride,
 	       0,
-	       plane_count * sizeof(*self->plane_stride));
-	memset(self->plane_size, 0, plane_count * sizeof(*self->plane_size));
+	       plane_count * sizeof(self->plane_stride[0]));
+	memset(self->plane_size, 0, plane_count * sizeof(self->plane_size[0]));
 	if (!align_constrained) {
 		memset(self->cfg.plane_stride_align,
 		       0,
-		       plane_count * sizeof(*self->cfg.plane_stride_align));
+		       plane_count * sizeof(self->cfg.plane_stride_align[0]));
 		memset(self->cfg.plane_scanline_align,
 		       0,
-		       plane_count * sizeof(*self->cfg.plane_scanline_align));
+		       plane_count * sizeof(self->cfg.plane_scanline_align[0]));
 		memset(self->cfg.plane_size_align,
 		       0,
-		       plane_count * sizeof(*self->cfg.plane_size_align));
+		       plane_count * sizeof(self->cfg.plane_size_align[0]));
 	}
 
 	/* Get non-aligned plane_stride and plane_size */
@@ -464,7 +470,7 @@ int vraw_reader_destroy(struct vraw_reader *self)
 }
 
 
-int vraw_reader_get_config(struct vraw_reader *self,
+int vraw_reader_get_config(const struct vraw_reader *self,
 			   struct vraw_reader_config *config)
 {
 	ULOG_ERRNO_RETURN_ERR_IF(self == NULL, EINVAL);
@@ -476,7 +482,7 @@ int vraw_reader_get_config(struct vraw_reader *self,
 }
 
 
-ssize_t vraw_reader_get_min_buf_size(struct vraw_reader *self)
+ssize_t vraw_reader_get_min_buf_size(const struct vraw_reader *self)
 {
 	ULOG_ERRNO_RETURN_ERR_IF(self == NULL, EINVAL);
 
@@ -484,7 +490,7 @@ ssize_t vraw_reader_get_min_buf_size(struct vraw_reader *self)
 }
 
 
-ssize_t vraw_reader_get_file_frame_count(struct vraw_reader *self)
+ssize_t vraw_reader_get_file_frame_count(const struct vraw_reader *self)
 {
 	ULOG_ERRNO_RETURN_ERR_IF(self == NULL, EINVAL);
 
